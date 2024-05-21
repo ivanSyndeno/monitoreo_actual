@@ -1,0 +1,7 @@
+{{ define "subject.tmpl" }}
+{{ if gt (len .Alerts.Resolved) 0 -}}
+Resolved
+{{ else if gt (len .Alerts.Firing) 0 -}}
+Firing
+{{ end -}}
+{{ end }}

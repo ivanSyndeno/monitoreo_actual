@@ -1,0 +1,29 @@
+route:
+  receiver: 'null'
+
+  routes:
+  - match:
+      severity: 'critical'
+    receiver: admin
+    group_by: ['alertname','client']
+    group_wait: 1m #Tiempo de espera para agrupar para el mismo receptor
+    group_interval: 1m #Agrupar alertas en un mismo mensaje, si son iguales
+    repeat_interval: 6h
+
+receivers:
+- name: 'null'
+- name: admin
+  email_configs:
+  - to: 'icc21010@gmail.com'                                      #'alerts@syndeno.com'
+    from: 'ivan.carmona@syndeno.com'
+    headers:
+      subject: '{{ if gt (len .Alerts.Resolved) 0 }}Resolved{{ else if gt (len .Alerts.Firing) 0 }}Firing{{ end }}'
+      pod: '{{ .CommonLabels.pod }}'
+      html: '{{ template "alert.tmpl" . }}'
+    smarthost: smtp.gmail.com:587                              #mx1.gc.syndeno.net:587
+    auth_username: 'ivan.carmona@syndeno.com'
+    auth_identity: 'ivan.carmona@syndeno.com'
+    auth_password: 'hpubljdvjrrcvjki'             #contraseña especial que se utiliza para comunicaciones ajbsralyyygsekau
+
+templates:
+  - '/etc/alertmanager/templates/alert.tmpl'

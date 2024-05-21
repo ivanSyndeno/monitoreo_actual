@@ -1,0 +1,11 @@
+groups:
+- name: alert.rules
+  rules:
+  - alert: TestAlertFiring
+    expr: vector(0) == 1
+    for: 1m
+    labels:
+      severity: 'critical'
+    annotations:
+      summary: "Test alert is firing"
+      description: "This is a test alert to verify firing notifications."

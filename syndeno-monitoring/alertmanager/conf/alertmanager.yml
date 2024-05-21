@@ -1,0 +1,33 @@
+global:
+  resolve_timeout: 2m
+route:
+  receiver: 'null'
+
+  routes:
+  - match:
+      severity: 'critical'
+    receiver: admin
+    group_by: ['client', 'alertname']
+    group_wait: 1m #Tiempo de espera para agrupar para el mismo receptor
+    group_interval: 1m #Agrupar alertas en un mismo mensaje, si son iguales
+    repeat_interval: 3h
+
+receivers:
+- name: 'null'
+- name: admin
+  email_configs:
+  - to: 'icc21010@gmail.com'                                      #'alerts@syndeno.com'
+    from: 'ivan.carmona@syndeno.com'
+    headers:
+      subject: '{{ if gt (len .Alerts.Resolved) 0 }}Resolved - {{ $foundValue := false }} {{ $value := "" }} {{ range .Alerts.Resolved }} {{ if not $foundValue }} {{ $value = .Labels.cluster }} {{ $foundValue = true }} {{ end }} {{ end }} {{ if $foundValue }} {{ $value }} {{ else }} {{ end }} ·· {{ $foundValue := false }} {{ $value := "" }} {{ range .Alerts.Resolved }} {{ if not $foundValue }} {{ $value = .Labels.alertname }} {{ $foundValue = true }} {{ end }} {{ end }} {{ if $foundValue }} {{ $value }} {{ else }} {{ end }} {{ else if gt (len .Alerts.Firing) 0 }}Firing - {{ $foundValue := false }} {{ $value := "" }} {{ range .Alerts.Firing }} {{ if not $foundValue }} {{ $value = .Labels.cluster }} {{ $foundValue = true }} {{ end }} {{ end }} {{ if $foundValue }} {{ $value }} {{ else }} {{ end }} ·· {{ $foundValue := false }} {{ $value := "" }} {{ range .Alerts.Firing }} {{ if not $foundValue }} {{ $value = .Labels.alertname }} {{ $foundValue = true }} {{ end }} {{ end }} {{ if $foundValue }} {{ $value }} {{ else }} {{ end }} {{ end }}'
+      #subject: '{{ if gt (len .Alerts.Resolved) 0 }}Resolved - {{ else if gt (len .Alerts.Firing) 0 }}Firing {{ end }} - {{ $foundValue := false }} {{ $value := "" }} {{ range .Alerts.Firing }} {{ if not $foundValue }} {{ $value = .Labels.cluster }} {{ $foundValue = true }} {{ end }} {{ end }} {{ if $foundValue }} {{ $value }} {{ else }} {{ end }} ·· {{ $foundValue := false }} {{ $value := "" }} {{ range .Alerts.Firing }} {{ if not $foundValue }} {{ $value = .Labels.alertname }} {{ $foundValue = true }} {{ end }} {{ end }} {{ if $foundValue }} {{ $value }} {{ else }} {{ end }}'
+      pod: '{{ .CommonLabels.pod }}'
+    html: '{{ template "alert.tmpl" . }}'
+    smarthost: smtp.gmail.com:587                              #mx1.gc.syndeno.net:587
+    auth_username: 'ivan.carmona@syndeno.com'
+    auth_identity: 'ivan.carmona@syndeno.com'
+    auth_password: 'hpubljdvjrrcvjki'             #contraseña especial que se utiliza para comunicaciones ajbsralyyygsekau
+    send_resolved: true
+
+templates:
+  - '/etc/alertmanager/templates/alert.tmpl'
